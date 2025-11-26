@@ -136,7 +136,7 @@ export const sketch: Sketch = (p5) => {
     }
 
     p5.setup = () => {
-        p5.createCanvas(p5.displayWidth, p5.displayHeight);
+        p5.createCanvas(p5.displayWidth / 2, p5.displayHeight / 2);
         init();
     };
 
