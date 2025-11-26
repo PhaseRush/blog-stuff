@@ -1,12 +1,12 @@
 "use client";
 
 import { P5Canvas, type Sketch } from "@p5-wrapper/react";
-// import { DoublePendulum } from "../doublependulum/DoublePendulum";
+import { DoublePendulum } from "../double_pendulum/DoublePendulum";
 import { frameEpsilon, SimplePoint2D } from "../util/util";
 
 let vertices: SimplePoint2D[] = [];
 let numSides = 100;
-// let pendulum: DoublePendulum;
+let pendulum: DoublePendulum;
 
 interface Polygon {
     x: number,
@@ -44,13 +44,13 @@ export const sketch: Sketch = (p5) => {
         const a_v2 = 0;
         const cx = p5.width / 2;
         const cy = p5.height / 4;
-        const nodeColor = p5.color("0xFFFFFF");
-        const historyColour = p5.color("0xFFFFFF");
+        const nodeColor = p5.color(255,255,255);
+        const historyColour = p5.color(255,255,255);
 
-        // pendulum = new DoublePendulum(
-        //     p5, 1, r1, r2, m1, m2, a1, a2, a_v1, a_v2, cx, cy, nodeColor, historyColour, 255,
-        //     true, false, false
-        // );
+        pendulum = new DoublePendulum(
+            p5, 1, r1, r2, m1, m2, a1, a2, a_v1, a_v2, cx, cy, nodeColor, historyColour, 255,
+            true, false, false
+        );
     }
 
     function restoreRingSettings() {
