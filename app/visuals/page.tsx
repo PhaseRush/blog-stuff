@@ -1,20 +1,50 @@
 "use client";
 
-import Halo from './p5/halo/sketch';
-import Eye from './p5/eye/sketch';
-// import PurityRing from './p5/purity_ring/sketch';
-import Sample from './p5/sample'
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
+
+const Halo = dynamic(() => import('./p5/halo/sketch'), {
+  ssr: false,
+});
+
+const Eye = dynamic(() => import('./p5/eye/sketch'), {
+  ssr: false,
+});
+
 
 const PurityRing = dynamic(() => import('./p5/purity_ring/sketch'), {
   ssr: false,
 });
 
+const Topography = dynamic(() => import('./p5/topography/sketch'), {
+  ssr: false,
+});
+
+const visuals = [
+  { name: 'Eye', Component: Eye },
+  { name: 'Halo', Component: Halo },
+  { name: 'PurityRing', Component: PurityRing },
+  { name: 'Topography', Component: Topography },
+];
+
 export default function Page() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleClick = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % visuals.length);
+  };
+
+  const CurrentVisual = visuals[currentIndex].Component;
+
   return (
     <section>
       <h1 className="font-semibold text-2xl mb-8 tracking-tighter">my stuff</h1>
-      <PurityRing />
+      <div onClick={handleClick} style={{ cursor: 'pointer' }}>
+        {visuals[currentIndex].name} ({currentIndex + 1}/{visuals.length}) - Click to see next
+        <CurrentVisual />
+        <p className="text-sm text-gray-500 mt-4">
+        </p>
+      </div>
     </section>
   )
 }
