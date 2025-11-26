@@ -43,7 +43,7 @@ export const sketch: Sketch = (p5) => {
     }
 
     p5.setup = () => {
-        p5.createCanvas(p5.displayWidth / 2, p5.displayHeight / 2);
+        p5.createCanvas(p5.windowWidth / 2, p5.windowHeight, p5.WEBGL);
         FreePoint.init(p5, allowOffScreen);
         init();
     };
