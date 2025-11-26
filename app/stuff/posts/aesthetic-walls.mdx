@@ -1,0 +1,49 @@
+---
+title: Aesthetic Walls
+excerpt: Dynamic, procedural, and aesthetic visuals generated using P5.js
+coverImage: '/assets/stuff/dynamic-routing/topo.png'
+publishedAt: '2021-09-19T11:00:00.000Z'
+author:
+  name: PhaseRush
+  picture: '/assets/stuff/authors/profile.png'
+ogImage:
+  url: '/assets/stuff/dynamic-routing/topo.png'
+---
+
+I _love_ aesthetically pleasing visuals.
+
+So I made this project to enhance how my desktop background looks.
+
+This project uses [P5.js](https://p5js.org/) to render my ideas. Back in my day, we used [Processing](https://processing.org/) and Java 7 to build games and visualizations. Nowadays, P5.js is the more popular and modular framework to use for all my visualization needs (except maybe [d3](https://d3js.org/) but that's another topic).
+
+These projects run both in the browser, as well as in Wallpaper Engine, which thankfully accepts an HTML and JS file.
+
+Click on each header/title to view the visualization. If you have trouble viewing it, maximize the window (on computers).
+
+### 0. [Double Pendulum](https://phaserush.github.io/wall-engines/double-pendulum/wall.html)
+
+
+The [double pendulum](https://en.wikipedia.org/wiki/Double_pendulum) is a classic chaotic system. [My interpretation](https://github.com/PhaseRush/AestheticWalls/blob/master/src/doublependulum) of it also includes a nice trailing translucent pink dot to track the history of the tip of the second pendulum.
+
+
+### 1. [Starfield](https://github.com/PhaseRush/AestheticWalls/blob/master/src/starfield)
+
+This is a port of one of my very first programs. A simple stream of stars falling down the page. I made this to relive the good memories. A visualization is not available for this one since I have not compiled it :(
+
+
+### 2. [Topography](https://phaserush.github.io/wall-engines/topography/wall.html)
+
+This is one of the coolest visuals I've made. Purely through [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise), it's possible to create 2D images that resemble [topographical maps](https://en.wikipedia.org/wiki/Topographic_map). It's pleasing to see the formations take shape as it runs. [Here's how it works](https://github.com/PhaseRush/AestheticWalls/tree/master/src/topography)
+
+[See it in action here](https://google.com) // TODO
+
+### 3. [Purity Ring](https://phaserush.github.io/wall-engines/purity-ring/wall.html)
+
+This was made purely for the aesthetic. I wanted to explore various ways to smoothly deform circles, and came across a method that used linear regression. I adopted this into [my code](https://github.com/PhaseRush/AestheticWalls/blob/master/src/purityring/sketch.ts), allowing for the double pendulum's tip's position do the distortions.
+
+### 4. [Vertex Plane](https://phaserush.github.io/wall-engines/vertex-plane-triangle/wall.html)
+[Alternate version](https://phaserush.github.io/wall-engines/vertex-plane-mesh/wall.html)
+
+This is a pretty simple simulation; some verticies moving around in 2d space, connecting with the nearest 2 verticies to form triangles. However, can you think of a smart algorithm for this? If you simply do 3 nested loops, you'll end up with an O(n^3) algorithm and it won't scale very well.
+
+[The solution](https://github.com/PhaseRush/AestheticWalls/tree/master/src/vertexplane) is to use a [KD-tree](https://en.wikipedia.org/wiki/K-d_tree) which provides the nearest neighbour to any vertex in `O(logn)` time. It's real fun to play around with, and opens up a lot more possibilites for visualization.

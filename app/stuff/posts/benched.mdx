@@ -1,0 +1,415 @@
+---
+title: Benched
+excerpt: Java benchmarks used for winning arguments against your friends.
+coverImage: '/assets/stuff/dynamic-routing/benchedprofile.webp'
+publishedAt: '2021-10-10T11:00:00.000Z'
+author:
+  name: PhaseRush
+  picture: '/assets/stuff/authors/profile.png'
+ogImage:
+  url: '/assets/stuff/dynamic-routing/benchedprofile.webp'
+---
+
+We've all heard these being thrown around in an abundance of algorithmic arguments:
+
+> _Arrays are faster than Lists!_ \
+> _Collection x is better than collection y!_ \
+> _Loops are faster than Streams!_ \
+> _Iterating over 2d arrays is faster in row major order!_ \
+> _Bogosort is faster than Quicksort!_
+
+Ok, no one has ever said that last line unironically ([I hope](https://github.com/PhaseRush/Benched/blob/e5c53191804e6a738c5a45f9b9c7b3320d437303/src/main/java/collections/Sorting.java#L34)), but have you ever wanted a way to prove - or be proven wrong about - the other statements?
+
+Constantly being challenged and asking questions regarding algorithmic performance lead me to start this project. I wanted a definitive way to test the theoretical knowledge I learned in various classes, and solidify and explain the phenomena I observed in my coding adventures. I've also changed hardware multiple times throughout the life of this project, and it's always cool seeing little leaps in performance when running the same benchmark on better hardware.
+
+There are too many benchmarks to outline them all, so I'll just point to a couple that I think really highlight something beautiful in computers, from physical CPU design all the way up to abstract API calls in the language.
+
+*Note: I'll be simplifying and shortening the numbers in this post. Check out the linked github for the full results.*
+
+### 0. [Contiguous memory and CPU pre-fecthing](https://github.com/PhaseRush/Benched/blob/master/src/main/java/memory/CacheBench.java)
+
+The principle of sequential locality refers to data which is arranged adjacently, thus allowing for efficient CPU caching when accessing the data. Arrays in C-family languages (ie. Java), are arranged in row-major order. 
+
+Looking at the data, it's obvious that the row-major operations execute significantly faster than their column-major counterparts.
+
+
+| Benchmark       | (N)   | Score (us/op)|
+| --------------  | ------: | ---------:  |
+| columnMajorSum  |    10 |      0.039 |
+| rowMajorSum     |    10 |      0.022 |
+| columnMajorSum  |   100 |      3.154 |
+| rowMajorSum     |   100 |      2.070 |
+| columnMajorSum  |  1000 |    958.767 |
+| rowMajorSum     |  1000 |    208.441 |
+| columnMajorSum  | 10000 | 596847.942 |
+| rowMajorSum     | 10000 |  31717.749 |
+
+Notice that with `N=10000`, the row-major is almost 20x faster than the column-major implementation while there is less discrepancy with smaller `N`. The reason for a discrepancy is due to the cpu's ability to pre-fetch the array elements, which are all cache hits for row-major while they're cache misses for column-major. However, the discrepancy suddenly jumps to 20x at `N=10000` because the CPU must go to RAM frequently when the desired memory is not in cache, drasticaly slowing it down.
+
+This particular benchmark was also run with various CPU and RAM speed configurations, with the intent of showing how the speed and size of the cache and ram affected this very memory sensitive measurement.
+
+### 1. [Number of digits in a number](https://github.com/PhaseRush/Benched/blob/master/src/main/java/math/NumDigitsBench.java)
+
+There are hundreds of ways to solve this problem. I've chosen the three below: 
+
+0. Convert to a string then take it's length
+```java
+String.valueOf(num).length()
+```
+1. Use Math to figure out the exponent, which is the number of digits
+```java
+num == 0 ? 1 : (1 + (int) Math.floor(Math.log10(Math.abs(num))))
+```
+2. Binary search the number of digits
+```java
+num < 100000 ? num < 100 ? num < 10 ? 1 : 2 : num < 1000 ? 3 : num < 10000 ? 4 : 5 : num < 10000000 ? num < 1000000 ? 6 : 7 : num < 100000000 ? 8 : num < 1000000000 ? 9 : 10
+```
+
+To illustrate how the speed of each solution varies with input, each solution was run with a few inputs:
+
+> 0. [`int_5`](https://github.com/PhaseRush/Benched/blob/e5c53191804e6a738c5a45f9b9c7b3320d437303/src/main/java/math/NumDigitsBench.java#L64), 5 digit int
+> 1. [`int_9`](https://github.com/PhaseRush/Benched/blob/e5c53191804e6a738c5a45f9b9c7b3320d437303/src/main/java/math/NumDigitsBench.java#L65), 9 digit int
+> 2. [`double_5`](https://github.com/PhaseRush/Benched/blob/e5c53191804e6a738c5a45f9b9c7b3320d437303/src/main/java/math/NumDigitsBench.java#L61), 5 digit double
+> 3. [`double_300`](https://github.com/PhaseRush/Benched/blob/e5c53191804e6a738c5a45f9b9c7b3320d437303/src/main/java/math/NumDigitsBench.java#L62), 300 digit double
+
+| Benchmark             | Mode | Cnt |   Score |   Error | Units |
+| --------------------- | ---- | --- | ------: | ------: | ----- |
+| double300Log          | avgt | 5   |   7.679 | ± 0.040 | ns/op |
+| double300StringLength | avgt | 5   | 627.809 | ± 4.211 | ns/op |
+|||||||
+|double300Log          |  avgt |  5 |   7.679 |  0.040 | ns/op |
+|double300StringLength |  avgt |  5 | 627.809 |  4.211 | ns/op |
+|||||||
+double5Log            |  avgt |  5 |   7.700 |  0.073 | ns/op |
+double5StringLength   |  avgt |  5 |  63.583 |  0.843 | ns/op |
+|||||||
+int5IfNest            |  avgt |  5 |   1.560 |  0.011 | ns/op |
+int5Log               |  avgt |  5 |   8.026 |  0.039 | ns/op |
+int5StringLength      |  avgt |  5 |   7.308 |  0.039 | ns/op |
+|||||||
+int9IfNest            |  avgt |  5 |   1.560 |  0.024 | ns/op |
+int9Log               |  avgt |  5 |   8.031 |  0.048 | ns/op |
+int9StringLength      |  avgt |  5 |  10.621 |  0.041 | ns/op |
+
+Everyone is taught in school that String manipulation is slower than math (for equivalent operations), but that's not always the case. We can see that the for integers, the String method is as fast as the log method. Math functions can be more expensive than you think.
+
+And as a surprise to some, the binary search method worked the fastest by far, across the board wherever it was applicable. This solution employes `O(log10(n))` number comparisons, which is far faster than an `O(n)` String creation and the overhead of the math function.
+
+Another point of interest is to see that the <code>log</code> solution's execution time does not scale with the size of the number, remaining around 8 nanoseconds for numbers that range from 5 to 300 digits. On the contrary, the String solution did scale with the size, as we would expect.
+
+### 2. [String concatenation](https://github.com/PhaseRush/Benched/blob/master/src/main/java/strings/StringBench.java)
+
+If you concatenate Strings in a loop like this:
+
+```java
+String acc = "";
+for (var x : collection) {
+    acc += x;
+}
+```
+
+I've got some big news for you.
+
+Strings in Java are immutable. This means that they cannot be modified after creation. Here's an example of `String#substring()`, showing that a new instance of String is being created (instead of a view of the current String).
+
+```java
+// java.lang.String
+    public String substring(int beginIndex, int endIndex) {
+        int length = length();
+        checkBoundsBeginEnd(beginIndex, endIndex, length);
+        if (beginIndex == 0 && endIndex == length) {
+            return this;
+        }
+        int subLen = endIndex - beginIndex;
+        return isLatin1() ? StringLatin1.newString(value, beginIndex, subLen)
+                          : StringUTF16.newString(value, beginIndex, subLen);
+    }
+```
+
+This means that mutating a String in any way (append, prepend, change character) involves making a completely new String with the modification applied. Thus, any String mutation operation (such as concatenation in a loop) is incredibly slow as new memory must be allocated and destroyed on every iteration.
+
+I tested 6 implementations:
+
+0. The "classic" appending to a String in a loop.
+```java
+    @Benchmark
+    public void stringConcat(Blackhole bh) {
+        String res = "";
+        for (int i = 0; i < N; i++) {
+            res += unit;
+        }
+        bh.consume(res);
+    }
+```
+
+1. Using StringBuffer, like the javadocs for the String class mentions.
+
+```java
+    @Benchmark
+    public void stringBuffer(Blackhole bh) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < N; i++) {
+            sb.append(unit);
+        }
+        bh.consume(sb);
+    }
+```
+
+2. Using StringBuilder
+
+```java
+    @Benchmark
+    public void stringBuilder(Blackhole bh) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < N; i++) {
+            sb.append(unit);
+        }
+        bh.consume(sb);
+    }
+```
+
+3. Cheating with `String#repeat()` to show the power of pre-allocation
+
+```java
+    @Benchmark
+    public void stringRepeat(Blackhole bh) {
+        bh.consume(unit.repeat(N));
+    }
+```
+
+4. Tossing in a `Stream.reduce()` for fun
+
+```java
+ @Benchmark
+    public void streamReduce(Blackhole bh) {
+        bh.consume(IntStream.range(0, N)
+        .mapToObj(i -> unit)
+        .reduce(String::concat));
+    }
+```
+
+5. ... then making it parallel
+```java
+    @Benchmark
+    public void parallelStreamReduce(Blackhole bh) {
+        bh.consume(IntStream.range(0, N)
+        .parallel() // the magic sauce
+        .mapToObj(i -> unit)
+        .reduce(String::concat));
+    }
+```
+
+Let's look at the results, then break it down.
+
+| Benchmark      | (N) | Mode | Cnt | Score |   Error | Units |
+| -------------- | --: | ---- | --- | ----: | ------: | ----- |
+|stringConcat |  100000 | avgt |   5 | 8616.315 | 235.166 | ms/op |
+|stringBuffer |  100000 | avgt |   5 |    1.232 |   0.030 | ms/op |
+|stringBuilder | 100000 | avgt |   5 |    0.950 |   0.048 | ms/op |
+|stringRepeat |  100000 | avgt |   5 |    0.163 |   0.004 | ms/op |
+|streamReduce |  100000 | avgt |   5 | 6599.168 | 249.764 | ms/op |
+|parallelStreamReduce | 100000 | avgt|   5   |112.556 | 5.038 | ms/op|
+
+
+First of all: the naive string concatenation in a loop is the worst performer. As mentioned, this is due to Strings being immutable, so each iteration entails creating and deleting memory.
+
+`StringBuffer` and `StringBuilder` perform similarly, with `StringBuilder` pulling ahead slightly. This is due to `StringBuffer` being synchronized, which includes a tiny bit of overhead, which we have measured.
+
+`String#repeat()` is a method that was introduced in Java 11. As you would expect, this method calculates the final size of the String ahead of time, and allocates the entire memory together. Then, it uses fast native calls to copy/duplicate the data, with a clever loop to copy at an exponential rate.
+
+```java
+    // java.lang.String
+    public String repeat(int count) {
+        // skipping some base cases and other fluff here ...
+        final int limit = len * count;
+        final byte[] multiple = new byte[limit]; // allocate in one go
+        System.arraycopy(value, 0, multiple, 0, len);
+        int copied = len;
+        // the <<= 1 call allows for log(n) iterations
+        for (; copied < limit - copied; copied <<= 1) {
+            System.arraycopy(multiple, 0, multiple, copied, copied);
+        }
+        System.arraycopy(multiple, 0, multiple, copied, limit - copied);
+        return new String(multiple, coder);
+    }
+```
+
+As expected, `String#repeat()` is by far the fastest, outperforming even `StringBuilder` by a factor of 4. However, it's worth noting that this method only works for repeating Strings, while the other methods work without any limitation on the String.
+
+The sequential Stream performed slowly, though still faster than the naive iterative concatenation. The parallel implementation was able to achieve a 100x speedup over the sequential stream, though it's still 100x slower than the `StringBuilder`.
+
+Takeaway: don't naively concatenate Strings in a loop.
+
+
+
+### 3. [How fast can you deal your Deque?](https://github.com/PhaseRush/Benched/blob/master/src/main/java/collections/ArrayDequeVsLinkedList.java)
+
+Let's take a little break and do a quick one.
+
+`ArrayDeque` is faster than `LinkedList`.
+
+I ran a lot of benchmarks for this comparison, but let's just take a look at a curated list.
+
+| Benchmark           | (N)       | Mode | Cnt | Score (us/op) |  Error (us/op) |
+| --------------      | --:       | ---- | --- | ----:        |       ------: |
+|arrayDeque init      |        10 | avgt |  5 |      1.101 |        0.032 |
+|linkedList init      |        10 | avgt |  5 |      1.079 |        0.013 |
+|arrayDeque init      | 100000000 | avgt |  5 | 682196.480 |  1688984.231 |
+|linkedList init      | 100000000 | avgt |  5 |7181044.910 | 10077727.767 |
+|||||||
+|arrayDeque traverse  |        10 | avgt |  5 |      1.076 |       0.038  |
+|linkedList traverse  |        10 | avgt |  5 |      1.071 |       0.002  |
+|arrayDeque traverse  | 100000000 | avgt |  5 | 433594.004 |   99847.736  |
+|linkedList traverse  | 100000000 | avgt |  5 |1354218.609 |  957037.882  |
+|||||||
+|arrayDeque removeAll |        10 | avgt |  5 |      1.065 |        0.002 |
+|linkedList removeAll |        10 | avgt |  5 |      1.072 |        0.008 |
+|arrayDeque removeAll | 100000000 | avgt |  5 | 449730.860 |   547815.400 |
+|linkedList removeAll | 100000000 | avgt |  5 |1701792.392 |  1759202.243 |
+
+From these results, I can safely recommend `ArrayDeque` over `LinkedList` to anyone who is looking to use a Queue or Stack data structure. `ArrayDeque` is backed by an array, while `LinkedList` is backed by nodes which need to be allocated and deallocated every time. Even considering `ArrayDeque`'s need to grow and shrink the backing array, the amortized cost is low enough such that the overall performance is substantially better than `LinkedList`.
+
+### 4. [How fast can you sum a list of numbers?](https://github.com/PhaseRush/Benched/blob/master/src/main/java/math/sumlist/SumDoubleList.java)
+
+For the finale, I'll present the answer to a question my friends were asking:
+
+> How fast can you sum a list of numbers? Let's say we're working with an `ArrayList` of type `Double`.
+
+Let's outline the solutions:
+
+0. The "classic" adding to an accumulator in a loop. This is what your typical student will come up with.
+```java
+    @Benchmark
+    public void forLoop(Blackhole bh) {
+        double sum = 0;
+        for (double num : list) {
+            sum += num;
+        }
+        bh.consume(sum);
+    }
+```
+
+1. `DoubleAdder` is a class that seems to be made for this. Let's see how it performs.
+```java
+    @Benchmark
+    public void doubleAdder(Blackhole bh) {
+        DoubleAdder a = new DoubleAdder();
+        list.parallelStream().forEach(a::add);
+        bh.consume(a.doubleValue());
+    }
+```
+
+2. Mapping to a double then summing
+```java
+    @Benchmark
+    public void mapToDoubleSum(Blackhole bh) {
+        double sum = list.stream()
+                         .mapToDouble(Double::doubleValue)
+                         .sum();
+        bh.consume(sum);
+    }
+```
+There is another equivalent variation tested which instead used the primitive identity map:
+```java
+    @Benchmark
+    public void mapToDoubleSum_prim(Blackhole bh) {
+        double sum = list.stream()
+                         .mapToDouble(i -> i)
+                         .sum();
+        bh.consume(sum);
+    }
+```
+These two performed identically, so only one will be represented in the final table.
+
+3. Mapping to a double then summing, but parallelized. Similar to the sequential stream, an equivalent variation using the primitive identity map performed identically so I won't show it here.
+```java
+    @Benchmark
+    public void mapToDoubleSumParallel(Blackhole bh) {
+        double sum = list.parallelStream()
+                         .mapToDouble(Double::doubleValue)
+                         .sum();
+        bh.consume(sum);
+    }
+```
+
+4. Reducing a stream by `Double`'s summing function
+```java
+    @Benchmark
+    public void reduceSumDouble(Blackhole bh) {
+        double sum = list.stream()
+                         .reduce(0.0, Double::sum);
+        bh.consume(sum);
+    }
+```
+
+5. ... but parallelized
+```java
+    @Benchmark
+    public void reduceSumDoubleParallel(Blackhole bh) {
+        double sum = list.parallelStream()
+                         .reduce(0.0, Double::sum);
+        bh.consume(sum);
+    }
+```
+
+6. Using `Collector.summingDouble()`
+```java
+    @Benchmark
+    public void summingCollectorDouble(Blackhole bh) {
+        // if not for the noinspection comment, IntelliJ IDEA would simplify this call to 
+        // double sum = list.stream().mapToDouble(i -> i).sum();
+        //noinspection SimplifyStreamApiCallChains
+        double sum = list.stream()
+                         .collect(Collectors.summingDouble(i -> i));
+        bh.consume(sum);
+    }
+```
+
+7. ...
+```java
+    public void summingCollectorDoubleParallel(Blackhole bh) {
+        //noinspection SimplifyStreamApiCallChains
+        double sum = list.parallelStream()
+                         .collect(Collectors.summingDouble(i -> i));
+        bh.consume(sum);
+    }
+```
+
+Let's have a look at a curated set of results.
+
+| Benchmark                     | (N)  | Mode | Cnt | Score (us/op) |  Error (us/op) |
+| --------------                | --:  | ---- | --- | ----:         |  ------: |
+|forLoop                        |      10 | avgt |  10  |    0.006  |   0.001|
+|doubleAdder                    |      10 | avgt |  10  |    5.551  |   0.034|
+|mapToDoubleSum                 |      10 | avgt |  10  |    0.057  |   0.001|
+|mapToDoubleSumParallel         |      10 | avgt |  10  |    5.642  |   0.040|
+|reduceSumDouble                |      10 | avgt |  10  |    0.054  |   0.001|
+|reduceSumDoubleParallel        |      10 | avgt |  10  |    5.590  |   0.031|
+|summingCollectorDouble         |      10 | avgt |  10  |    0.063  |   0.001|
+|summingCollectorDoubleParallel |      10 | avgt |  10  |    5.879  |   0.013|
+|||||||
+|forLoop                        |10000000 | avgt |  10  |10899.721  | 114.039|
+|doubleAdder                    |10000000 | avgt |  10  | 7247.295  |  20.757|
+|mapToDoubleSum                 |10000000 | avgt |  10  |35498.336  |  87.104|
+|mapToDoubleSumParallel         |10000000 | avgt |  10  | 7246.922  |  11.496|
+|reduceSumDouble                |10000000 | avgt |  10  |29835.707  | 106.342|
+|reduceSumDoubleParallel        |10000000 | avgt |  10  |22112.735  |  18.310|
+|summingCollectorDouble         |10000000 | avgt |  10  |45315.357  | 375.390|
+|summingCollectorDoubleParallel |10000000 | avgt |  10  | 7275.261  |  93.681|
+
+
+That's a lot of data to take in. Let's break it down.
+
+
+As expected, the for loop performs the fastest when there are only 10 elements. The minimal overhead allows the simple manual loop accumlation to blow (almost) everything out of the water. Surprisingly `Collector.summingDouble()` performs almost as well, which is surprising given that it theoretically has some overhead. However, when we increase the element count to 1 million, this implementatino performs the worst; I'm not exactly what changed to cause this discrepancy, but it's quite curious.
+
+DoubleAdder and the parallel stream implementations had the slowest runtimes for `N=10`, due to their relatively high overheads of about 100x their sequential counterparts. However, it pays off as they have the fastest runtimes for `N=1E6`, all ending up 30% faster than even the "overhead-less" for loop, except for the `Stream.reduce()` solution, which seems to struggle to scale as N increases. This shows the importance of the constant factor in algorithmic analysis. Even though everyone is caught up with big O notation, the constant factors are dominant over higher powers at low `N`. Only once we get into "asymptotic" territoriy of [`N=1E4`](https://github.com/PhaseRush/Benched/blob/eb8e6c3052bafc67f2b5bee8b5d4d56660fc8e90/src/main/java/math/sumlist/SumDoubleList.java#L48) do we start seeing the constants falling off compared to dominant terms.
+
+The overall lesson this shows is that the naive for loop is not a bad choice; for novice programmers, the time saved from not figuring out the other implemtations would likely result in more savings than the difference in runtime. However, the benchmark does also show that there are methods that can beat simpler solutions, so understanding how things work under the hood and leveraging hardware can result in faster code.
+
+
+## That was just a selection of my favourite benchmarks.
+
+There are many, _many_ more benchmarks in the repository, and I'm still adding benchmarks which answer questions that piqued my interest. This is an ever growing set of data that I'll continue to contribute to in the pursuit of scratching that performance itch.
+
+And if you actually read this wall of text to this point, you're probably interested in performance as much as I am. Tag along and feel free to contribute :)
