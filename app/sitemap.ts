@@ -1,6 +1,6 @@
 import { getBlogPosts } from 'app/stuff/utils'
 
-export const baseUrl = 'https://portfolio-blog-starter.vercel.app'
+export const baseUrl = 'https://phaserush.info'
 
 export default async function sitemap() {
   let blogs = getBlogPosts().map((post) => ({
