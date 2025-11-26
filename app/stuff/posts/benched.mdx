@@ -33,16 +33,16 @@ The principle of sequential locality refers to data which is arranged adjacently
 Looking at the data, it's obvious that the row-major operations execute significantly faster than their column-major counterparts.
 
 
-| Benchmark       | (N)   | Score (us/op)|
+| Benchmark (2D summation)       | (N)   | Score (us/op)|
 | --------------  | ------: | ---------:  |
-| columnMajorSum  |    10 |      0.039 |
-| rowMajorSum     |    10 |      0.022 |
-| columnMajorSum  |   100 |      3.154 |
-| rowMajorSum     |   100 |      2.070 |
-| columnMajorSum  |  1000 |    958.767 |
-| rowMajorSum     |  1000 |    208.441 |
-| columnMajorSum  | 10000 | 596847.942 |
-| rowMajorSum     | 10000 |  31717.749 |
+| columnMajor  |    10 |      0.039 |
+| rowMajor     |    10 |      0.022 |
+| columnMajor  |   100 |      3.154 |
+| rowMajor    |   100 |      2.070 |
+| columnMajor  |  1000 |    958.767 |
+| rowMajor     |  1000 |    208.441 |
+| columnMajor  | 10000 | 596847.942 |
+| rowMajor     | 10000 |  31717.749 |
 
 Notice that with `N=10000`, the row-major is almost 20x faster than the column-major implementation while there is less discrepancy with smaller `N`. The reason for a discrepancy is due to the cpu's ability to pre-fetch the array elements, which are all cache hits for row-major while they're cache misses for column-major. However, the discrepancy suddenly jumps to 20x at `N=10000` because the CPU must go to RAM frequently when the desired memory is not in cache, drasticaly slowing it down.
 

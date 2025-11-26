@@ -143,7 +143,11 @@ table {
   max-width: fit-content;
   overflow-x: auto;
   white-space: nowrap;
-  border-spacing: 1em 0.5em;
+}
+
+table td,
+table th {
+  padding: 0.25em 1em;
 }
 
 .title {
