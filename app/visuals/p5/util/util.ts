@@ -6,7 +6,10 @@ export function randFromEnum(e: any): any {
 export function rand<T>(e: T[]): T {
     if (Array.isArray(e)) {
         return e[Math.floor((Math.random() * e.length))];
-    } else return undefined;
+    } else {
+        // @ts-expect-error
+        return undefined;
+    }
 }
 
 export interface SimplePoint2D {
