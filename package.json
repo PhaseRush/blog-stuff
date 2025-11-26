@@ -14,7 +14,14 @@
     "@types/react-dom": "19.2.3",
     "@vercel/analytics": "^1.1.3",
     "@vercel/speed-insights": "^1.0.9",
+    "bit-twiddle": "^1.0.2",
     "geist": "^1.5.1",
+    "inorder-tree-layout": "^1.0.0",
+    "ndarray": "^1.0.19",
+    "ndarray-ops": "^1.2.2",
+    "ndarray-pack": "^1.2.1",
+    "ndarray-scratch": "^1.2.0",
+    "ndarray-select": "^1.0.1",
     "next": "^16.0.4",
     "next-mdx-remote": "^4.4.1",
     "p5": "^2.1.1",
@@ -24,6 +31,7 @@
     "remark-gfm": "3.0.1",
     "sugar-high": "^0.6.0",
     "tailwindcss": "4.0.0-alpha.13",
+    "typedarray-pool": "^1.2.0",
     "typescript": "5.3.3"
   },
   "devDependencies": {

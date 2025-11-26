@@ -20,11 +20,16 @@ const Topography = dynamic(() => import('./p5/topography/sketch'), {
   ssr: false,
 });
 
+const VertexPlane = dynamic(() => import('./p5/vertexplane/sketch'), {
+  ssr: false,
+});
+
 const visuals = [
   { name: 'Eye', Component: Eye },
   { name: 'Halo', Component: Halo },
   { name: 'PurityRing', Component: PurityRing },
   { name: 'Topography', Component: Topography },
+  { name: 'VertexPlane', Component: VertexPlane },
 ];
 
 export default function Page() {
