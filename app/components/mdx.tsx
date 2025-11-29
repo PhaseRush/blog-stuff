@@ -54,6 +54,26 @@ function Code({ children, ...props }) {
   return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
 }
 
+function getTextContent(children) {
+  if (typeof children === 'string') {
+    return children
+  }
+
+  if (typeof children === 'number') {
+    return children.toString()
+  }
+
+  if (Array.isArray(children)) {
+    return children.map(getTextContent).join('')
+  }
+
+  if (React.isValidElement(children) && children.props?.children) {
+    return getTextContent(children.props.children)
+  }
+
+  return ''
+}
+
 function slugify(str) {
   return str
     .toString()
@@ -67,7 +87,7 @@ function slugify(str) {
 
 function createHeading(level) {
   const Heading = ({ children }) => {
-    let slug = slugify(children)
+    let slug = slugify(getTextContent(children))
     return React.createElement(
       `h${level}`,
       { id: slug },
