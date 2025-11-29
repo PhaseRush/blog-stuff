@@ -54,7 +54,7 @@ function Code({ children, ...props }) {
   return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
 }
 
-function getTextContent(children) {
+function getTextContent(children: React.ReactNode): string {
   if (typeof children === 'string') {
     return children
   }
@@ -67,8 +67,11 @@ function getTextContent(children) {
     return children.map(getTextContent).join('')
   }
 
-  if (React.isValidElement(children) && children.props?.children) {
-    return getTextContent(children.props.children)
+  if (React.isValidElement(children)) {
+    const props = children.props as { children?: React.ReactNode }
+    if (props.children) {
+      return getTextContent(props.children)
+    }
   }
 
   return ''
