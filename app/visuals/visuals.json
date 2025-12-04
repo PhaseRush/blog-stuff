@@ -1,0 +1,37 @@
+[
+  {
+    "slug": "eye",
+    "title": "Eye",
+    "description": "using shaders to obliterate your GPU",
+    "createdAt": "2022-02-03",
+    "componentPath": "./p5/eye/sketch"
+  },
+  {
+    "slug": "halo",
+    "title": "Halo",
+    "description": "looks kinda ass",
+    "createdAt": "2020-04-14",
+    "componentPath": "./p5/halo/sketch"
+  },
+  {
+    "slug": "purity_ring",
+    "title": "Purity Ring",
+    "description": "cute wobbly ring with a double pendulum cuz why not",
+    "createdAt": "2020-03-18",
+    "componentPath": "./p5/purity_ring/sketch"
+  },
+  {
+    "slug": "topography",
+    "title": "Topography",
+    "description": "one of my favs. topographical lines, but I didn't tune it correctly yet",
+    "createdAt": "2021-08-27",
+    "componentPath": "./p5/topography/sketch"
+  },
+  {
+    "slug": "vertexplane",
+    "title": "Vertex Plane",
+    "description": "cool k-closet points visualization",
+    "createdAt": "2020-05-21",
+    "componentPath": "./p5/vertexplane/sketch"
+  }
+]
