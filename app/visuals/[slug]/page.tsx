@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getAllVisuals, getVisualBySlug } from 'app/visuals/utils'
+import { getAllVisuals, getVisualBySlug, formatDate } from 'app/visuals/utils'
 import { VisualRenderer } from './visual-renderer'
 
 export async function generateStaticParams() {
@@ -23,6 +23,16 @@ export default async function VisualPage({ params }: { params: Promise<{ slug: s
       <h1 className="title font-semibold text-2xl tracking-tighter mb-2">
         {visual.title}
       </h1>
+      <div className="flex flex-col mb-4 text-sm">
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          {formatDate(visual.createdAt)}
+        </p>
+        {visual.modifiedAt && (
+          <p className="text-sm text-neutral-500 dark:text-neutral-500 mt-1">
+            Last modified: {formatDate(visual.modifiedAt)}
+          </p>
+        )}
+      </div>
       <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-8">
         {visual.description}
       </p>

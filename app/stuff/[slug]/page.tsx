@@ -71,7 +71,7 @@ export default async function Blog({ params }) {
             '@type': 'BlogPosting',
             headline: post.metadata.title,
             datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
+            dateModified: post.metadata.modifiedAt || post.metadata.publishedAt,
             description: post.metadata.summary,
             image: post.metadata.image
               ? `${baseUrl}${post.metadata.image}`
@@ -87,10 +87,15 @@ export default async function Blog({ params }) {
       <h1 className="title font-semibold text-2xl tracking-tighter">
         {post.metadata.title}
       </h1>
-      <div className="flex justify-between items-center mt-2 mb-8 text-sm">
+      <div className="flex flex-col mt-2 mb-8 text-sm">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           {formatDate(post.metadata.publishedAt)}
         </p>
+        {post.metadata.modifiedAt && (
+          <p className="text-sm text-neutral-500 dark:text-neutral-500 mt-1">
+            Last modified: {formatDate(post.metadata.modifiedAt)}
+          </p>
+        )}
       </div>
       <article className="prose">
         <CustomMDX source={post.content} />

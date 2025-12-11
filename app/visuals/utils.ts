@@ -6,6 +6,7 @@ export type VisualMetadata = {
   description: string
   createdAt: string
   componentPath: string
+  modifiedAt?: string
 }
 
 export function getAllVisuals(): VisualMetadata[] {
