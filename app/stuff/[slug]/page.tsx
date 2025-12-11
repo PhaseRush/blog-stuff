@@ -87,7 +87,12 @@ export default async function Blog({ params }) {
       <h1 className="title font-semibold text-2xl tracking-tighter">
         {post.metadata.title}
       </h1>
-      <div className="flex flex-col mt-2 mb-8 text-sm">
+      {post.metadata.excerpt && (
+        <p className="text-lg text-neutral-700 dark:text-neutral-300 italic mt-2 mb-4">
+          {post.metadata.excerpt}
+        </p>
+      )}
+      <div className="flex flex-col mb-8 text-sm">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           {formatDate(post.metadata.publishedAt)}
         </p>
